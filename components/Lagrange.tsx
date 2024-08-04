@@ -88,7 +88,7 @@ const LagrangeInterpolation: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-            <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
+            
                 <Input
                     type="number"
                     value={interpolationPoint}
@@ -141,7 +141,7 @@ const LagrangeInterpolation: React.FC = () => {
               </tbody>
             </Table>
           </div>
-          
+          <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
         </CardContent>
       </Card>
 

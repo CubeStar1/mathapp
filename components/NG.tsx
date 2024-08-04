@@ -133,7 +133,7 @@ const NewtonGregoryInterpolation: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-            <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
+            
             <Select value={method} onValueChange={(value) => setMethod(value as 'forward' | 'backward')}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Select method" />
@@ -201,6 +201,7 @@ const NewtonGregoryInterpolation: React.FC = () => {
               </TableBody>
             </Table>
           </div>
+          <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
         </CardContent>
       </Card>
 
