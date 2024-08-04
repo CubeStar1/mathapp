@@ -10,7 +10,7 @@ const InterpolationCalculator: React.FC = () => {
   const [interpolationMethod, setInterpolationMethod] = useState<'newton-gregory' | 'lagrange'>('newton-gregory');
 
   return (
-    <div className="p-4 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 max-w-4xl mx-auto space-y-6 ">
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Interpolation Calculator</CardTitle>

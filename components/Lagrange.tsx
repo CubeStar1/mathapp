@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Trash2 } from 'lucide-react';
-
+import TeX from '@matejmazur/react-katex';
+import 'katex/dist/katex.min.css';
 interface DataPoint {
   x: number;
   y: number;
@@ -59,13 +60,22 @@ const LagrangeInterpolation: React.FC = () => {
     let equation = 'f(x) = ';
     for (let i = 0; i < data.length; i++) {
       if (i > 0) equation += ' + ';
-      equation += `${data[i].y.toFixed(2)} * `;
+      equation += `${data[i].y.toFixed(2)} \\cdot `;
+      equation += '\\frac{';
       for (let j = 0; j < data.length; j++) {
         if (i !== j) {
-          equation += `((x - ${data[j].x.toFixed(2)}) / (${data[i].x.toFixed(2)} - ${data[j].x.toFixed(2)}))`;
-          if (j < data.length - 1 && j + 1 !== i) equation += ' * ';
+          equation += `(x - ${data[j].x.toFixed(2)})`;
+          if (j < data.length - 1 && j + 1 !== i) equation += ' \\cdot ';
         }
       }
+      equation += '}{';
+      for (let j = 0; j < data.length; j++) {
+        if (i !== j) {
+          equation += `(${data[i].x.toFixed(2)} - ${data[j].x.toFixed(2)})`;
+          if (j < data.length - 1 && j + 1 !== i) equation += ' \\cdot ';
+        }
+      }
+      equation += '}';
     }
     return equation;
   };
@@ -77,7 +87,17 @@ const LagrangeInterpolation: React.FC = () => {
           <CardTitle className="text-2xl font-bold">Lagrange Interpolation Calculator</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <Button onClick={addRow} className="w-full sm:w-auto">Add Row</Button>
+                <Input
+                    type="number"
+                    value={interpolationPoint}
+                    onChange={(e) => setInterpolationPoint(e.target.value)}
+                    placeholder="Enter interpolation point"
+                    className="w-full sm:w-full"
+                />
+                <Button onClick={interpolate} className="w-full sm:w-auto">Interpolate</Button> 
+            </div>
           <div className="overflow-x-auto">
             <Table>
               <thead>
@@ -93,7 +113,7 @@ const LagrangeInterpolation: React.FC = () => {
                     <td className="px-4 py-2">
                       <Input
                         type="number"
-                        value={row.x}
+                        
                         onChange={(e) => updateData(rowIndex, 'x', e.target.value)}
                         className="w-full"
                       />
@@ -101,7 +121,7 @@ const LagrangeInterpolation: React.FC = () => {
                     <td className="px-4 py-2">
                       <Input
                         type="number"
-                        value={row.y}
+                        
                         onChange={(e) => updateData(rowIndex, 'y', e.target.value)}
                         className="w-full"
                       />
@@ -121,16 +141,7 @@ const LagrangeInterpolation: React.FC = () => {
               </tbody>
             </Table>
           </div>
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            <Input
-              type="number"
-              value={interpolationPoint}
-              onChange={(e) => setInterpolationPoint(e.target.value)}
-              placeholder="Enter interpolation point"
-              className="w-full sm:w-auto"
-            />
-            <Button onClick={interpolate} className="w-full sm:w-auto">Interpolate</Button>
-          </div>
+          
         </CardContent>
       </Card>
 
@@ -148,9 +159,7 @@ const LagrangeInterpolation: React.FC = () => {
           )}
           <div>
             <h3 className="text-lg font-semibold mb-2">Interpolation Equation:</h3>
-            <p className="text-sm p-4 rounded-md border border-border overflow-x-auto whitespace-nowrap">
-              {getInterpolationEquation()}
-            </p>
+            <TeX math={getInterpolationEquation()} block/>
           </div>
         </CardContent>
       </Card>

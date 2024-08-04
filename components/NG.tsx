@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Table } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trash2 } from 'lucide-react';
+import TeX from '@matejmazur/react-katex';
+import 'katex/dist/katex.min.css';
 
 interface DataPoint {
   x: number;
@@ -19,6 +21,7 @@ const NewtonGregoryInterpolation: React.FC = () => {
   const [interpolationPoint, setInterpolationPoint] = useState<string>('');
   const [result, setResult] = useState<number | null>(null);
   const [method, setMethod] = useState<'forward' | 'backward'>('forward');
+  const [showDetailedResult, setShowDetailedResult] = useState<boolean>(false);
 
   const addRow = () => {
     setData([...data, { x: data.length, y: 0 }]);
@@ -91,6 +94,7 @@ const NewtonGregoryInterpolation: React.FC = () => {
     }
 
     setResult(result);
+    setShowDetailedResult(true);
   };
 
   const differences = useMemo(() => calculateDifferences(data), [data]);
@@ -100,22 +104,22 @@ const NewtonGregoryInterpolation: React.FC = () => {
       let equation = `f(x) = ${data[0].y.toFixed(2)}`;
       for (let i = 1; i < data.length; i++) {
         const sign = differences[i - 1][0] >= 0 ? '+' : '-';
-        equation += ` ${sign} ${Math.abs(differences[i - 1][0]).toFixed(2)}`;
+        equation += ` ${sign} \\frac{${Math.abs(differences[i - 1][0]).toFixed(2)}`;
         for (let j = 0; j < i; j++) {
-          equation += `(u${j === 0 ? '' : ` - ${j}`})`;
+          equation += `(u${j === 0 ? '' : `-${j}`})`;
         }
-        equation += ` / ${factorial(i)}`;
+        equation += `}{${factorial(i)}}`;
       }
       return equation;
     } else {
       let equation = `f(x) = ${data[data.length - 1].y.toFixed(2)}`;
       for (let i = 1; i < data.length; i++) {
         const sign = differences[i - 1][data.length - i - 1] >= 0 ? '+' : '-';
-        equation += ` ${sign} ${Math.abs(differences[i - 1][data.length - i - 1]).toFixed(2)}`;
+        equation += ` ${sign} \\frac{${Math.abs(differences[i - 1][data.length - i - 1]).toFixed(2)}`;
         for (let j = 0; j < i; j++) {
-          equation += `(u${j === 0 ? '' : ` + ${j}`})`;
+          equation += `(u${j === 0 ? '' : `+${j}`})`;
         }
-        equation += ` / ${factorial(i)}`;
+        equation += `}{${factorial(i)}}`;
       }
       return equation;
     }
@@ -139,42 +143,50 @@ const NewtonGregoryInterpolation: React.FC = () => {
                 <SelectItem value="backward">Backward Interpolation</SelectItem>
               </SelectContent>
             </Select>
+            <Input
+              type="number"
+              value={interpolationPoint}
+              onChange={(e) => setInterpolationPoint(e.target.value)}
+              placeholder="Enter interpolation point"
+              className="w-full sm:w-full"
+            />
+            <Button onClick={interpolate} className="w-full sm:w-auto">Interpolate</Button>
           </div>
           <div className="overflow-x-auto">
             <Table>
-              <thead>
-                <tr>
-                  <th className="px-4 py-2">X</th>
-                  <th className="px-4 py-2">Y</th>
-                  {differences[0] && differences[0].map((_, index) => (
-                    <th key={index} className="px-4 py-2">Δ^{index + 1}y</th>
-                  ))}
-                  <th className="px-4 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>X</TableHead>
+                  <TableHead>Y</TableHead>
+                  {/* {differences[0] && differences[0].map((_, index) => (
+                    <TableHead key={index}>Δ^{index + 1}y</TableHead>
+                  ))} */}
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {data.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    <td className="px-4 py-2">
+                  <TableRow key={rowIndex}>
+                    <TableCell>
                       <Input
                         type="number"
-                        value={row.x}
+                        
                         onChange={(e) => updateData(rowIndex, 'x', e.target.value)}
                         className="w-full"
                       />
-                    </td>
-                    <td className="px-4 py-2">
+                    </TableCell>
+                    <TableCell>
                       <Input
                         type="number"
-                        value={row.y}
+                        
                         onChange={(e) => updateData(rowIndex, 'y', e.target.value)}
                         className="w-full"
                       />
-                    </td>
-                    {differences.map((diff, diffIndex) => (
-                      <td key={diffIndex} className="px-4 py-2">{diff[rowIndex]?.toFixed(4) || ''}</td>
-                    ))}
-                    <td className="px-4 py-2">
+                    </TableCell>
+                    {/* {differences.map((diff, diffIndex) => (
+                      <TableCell key={diffIndex}>{diff[rowIndex]?.toFixed(4) || ''}</TableCell>
+                    ))} */}
+                    <TableCell>
                       <Button 
                         variant="ghost" 
                         size="icon"
@@ -183,48 +195,92 @@ const NewtonGregoryInterpolation: React.FC = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
+              </TableBody>
             </Table>
-          </div>
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            <Input
-              type="number"
-              value={interpolationPoint}
-              onChange={(e) => setInterpolationPoint(e.target.value)}
-              placeholder="Enter interpolation point"
-              className="w-full sm:w-auto"
-            />
-            <Button onClick={interpolate} className="w-full sm:w-auto">Interpolate</Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Results</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {result !== null && (
-            <Alert>
-              <AlertDescription className="text-lg">
-                Interpolated value: {result.toFixed(4)}
-              </AlertDescription>
-            </Alert>
-          )}
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Interpolation Equation:</h3>
-            <p className="text-sm p-4 rounded-md border border-border overflow-x-auto whitespace-nowrap">
-              {getInterpolationEquation()}
-            </p>
-            <p className="text-xs mt-2 italic">
-              Where u = (x - x₀) / h for forward, or u = (x - xₙ) / h for backward interpolation
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {showDetailedResult && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Detailed Results</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <h3 className="text-lg font-semibold mb-2">Input Data:</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>x</TableHead>
+                  <TableHead>f(x)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((point, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{point.x}</TableCell>
+                    <TableCell>{point.y}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <h3 className="text-lg font-semibold mt-4 mb-2">Newton's {method.charAt(0).toUpperCase() + method.slice(1)} Difference Table:</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>x</TableHead>
+                  <TableHead>y</TableHead>
+                  {differences.map((_, index) => (
+                    <TableHead key={index}>
+                      <TeX math={`\\Delta^${index + 1}y`} />
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((point, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    <TableCell>{point.x}</TableCell>
+                    <TableCell>{point.y}</TableCell>
+                    {differences.map((column, colIndex) => (
+                      <TableCell key={colIndex}>
+                        {column[rowIndex] !== undefined ? column[rowIndex].toFixed(2) : ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <div className="mt-4 space-y-2">
+              <p>The value of x at which you want to find f(x): x = {interpolationPoint}</p>
+              <p>
+                <TeX math={`h = x_1 - x_0 = ${data[1].x} - ${data[0].x} = ${data[1].x - data[0].x}`} />
+              </p>
+              <p>
+                <TeX math={`p = \\frac{x - x_0}{h} = \\frac{${interpolationPoint} - ${data[0].x}}{${data[1].x - data[0].x}} = ${((parseFloat(interpolationPoint) - data[0].x) / (data[1].x - data[0].x)).toFixed(2)}`} />
+              </p>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-4 mb-2">Newton's {method.charAt(0).toUpperCase() + method.slice(1)} Difference Interpolation Formula:</h3>
+            <div className="p-4 rounded-md border border-border overflow-x-auto">
+              <TeX math={getInterpolationEquation()} block />
+            </div>
+
+            {result !== null && (
+              <Alert>
+                <AlertDescription className="text-lg">
+                  Interpolated value: f({interpolationPoint}) = {result.toFixed(4)}
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

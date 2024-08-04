@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = () => (
-  <header className="flex justify-between items-center p-4 border-b sticky top-0 backdrop-blur-sm shadow-sm z-50 ">
+  <header className="flex justify-between items-center p-4 sticky top-0 backdrop-blur-xl shadow-sm z-50 ">
 
     <div className="text-2xl font-bold">
           Math
